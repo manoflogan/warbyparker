@@ -10,14 +10,11 @@ import java.util.Set;
 
 /**
  * An instance of this class encapsulates a trie data structure.
- * 
- * @author krishnanand (Kartik Krishnanand)
  */
 public class Trie {
   
   /**
    * Trie data structure
-   * @author krishnanand (Kartik Krishnanand)
    */
   private class TrieNode {
     private final Map<String, TrieNode> trieMap;
@@ -60,10 +57,15 @@ public class Trie {
    * @param patterns add patterns to the string
    */
   public void addPattern(String p) {
-    this.addPattern(p.split(","));
+    this.addPatternToTrie(p.split(","));
   }
   
-  private void addPattern(String[] patterns) {
+  /**
+   * Adds pattern to the trie data structure.
+   * 
+   * @param patterns array of patterns to be added in a tree
+   */
+  private void addPatternToTrie(String[] patterns) {
     TrieNode current = this.root;
     for (String pattern: patterns) {
       Map<String, TrieNode> trieMap = current.getTrieMap();
@@ -74,6 +76,12 @@ public class Trie {
     current.setEndOfWord(true);
   }
   
+  /**
+   * Finds the match pattern
+   * 
+   * @param expression expression whose matching pattern is to be found
+   * @return matching pattern is found; {@code NO MATCH} if not
+   */
   String findMatchingPattern(String expression) {
     if (expression == null || expression.isEmpty()) {
       return "NO MATCH";
@@ -110,7 +118,7 @@ public class Trie {
    * Finds a set of all matching patterns.
    * 
    * @param expressions array of characters to be matched against a regex
-   * @param fragment concatenated matching expression fragment
+   * @param fragment concatenated matching pattern fragment
    * @param index index at which the character is to be checked
    * @param node trie node instance
    * @param matches set to hold all matching patterns.
@@ -182,7 +190,29 @@ public class Trie {
     return fragment;
   }
   
-  String findBestPattern(String[] expressions, Set<String> matches) {
+  /**
+   * Finds the best pattern among theet of matches.
+   * 
+   * <p>The algorithm is given below
+   * <ul>
+   *   <li>Iterate through every pattern in an array.<li>
+   *   <li>Each individual pattern is converted to an array of comma separated strings and
+   *     <ul>
+   *       <li>The pattern array is compared against input array string. If the contents of
+   *       the arrays exactly match, then the array is returned.</li>
+   *       <li>If the pattern contains wild cards then number of wild cards are counted.</li>
+   *       <li>If there is only one pattern with the least number of wild cards, then that
+   *       pattern is returned.<li>
+   *       <li>If there are multiple patterns with the same number of wild cards, then the
+   *       pattern with furthest unmatched wild card from the left is chosen.</li>
+   *     </ul>
+   * </ul>
+   * 
+   * @param expressions comma separated array of string
+   * @param matches set of patterns that have matched the string
+   * @return best matched pattern; {@code null} if no pattern is found
+   */
+  private String findBestPattern(String[] expressions, Set<String> matches) {
     if (matches == null || matches.isEmpty()) {
       return null;
     }
@@ -191,28 +221,33 @@ public class Trie {
     String bestMatch = null;
     for (String match : matches) {
       String[] matchSplit = match.split(",");
+      // Looking for an exact match.
       if (Arrays.equals(expressions, matchSplit)) {
         return match;
       }
-      int numberOfWildCards = 0;
       
+      // Counting the number of wild cards.
+      int numberOfWildCards = 0;
       for (int i = 0; i < matchSplit.length; i++) {
         if (matchSplit[i].equals("*")) {
           numberOfWildCards ++;
         }
       }
+      
+      // The pattern with the least number of wild card is chosen.
       if (numberOfWildCards < minNumberOfWildCards) {
         minNumberOfWildCards = numberOfWildCards;
         bestMatch = match;
         rightMostWildCardPosition = match.indexOf("*");
       } else if (numberOfWildCards == minNumberOfWildCards) {
+        // Checking for the furthest wild card from the left. 
         int lastWildCardPosition = match.indexOf("*");
         if (lastWildCardPosition > rightMostWildCardPosition) {
           rightMostWildCardPosition = lastWildCardPosition;
           bestMatch = match;
         } else if (lastWildCardPosition == rightMostWildCardPosition) {
-          // Applying rule recursively.
-          bestMatch = this.findLeftMostWildCard(
+          // Applying rule recursively if the wild cards match.
+          bestMatch = this.findFurthestWildCardFromLeft(
               bestMatch, rightMostWildCardPosition + 1, match, lastWildCardPosition + 1);
         }
       }
@@ -220,7 +255,17 @@ public class Trie {
     return bestMatch;
   }
   
-  private String findLeftMostWildCard(String first, int firstIndex, String second, int secondIndex) {
+  /**
+   * Finds the string that has the furthest wild card from the left.
+   * 
+   * @param first first string
+   * @param firstIndex index of the first string
+   * @param second  string string
+   * @param secondIndex index of the second string
+   * @return string with the wild card that is furthest from the left
+   */
+  private String findFurthestWildCardFromLeft(
+      String first, int firstIndex, String second, int secondIndex) {
     if (firstIndex >= first.length() && secondIndex >= second.length()) {
       return "";
     }
@@ -239,7 +284,7 @@ public class Trie {
     } else if (firstWildPosition > secondWildPosition) {
       return first;
     } else {
-      return this.findLeftMostWildCard(
+      return this.findFurthestWildCardFromLeft(
           firstString, firstWildPosition + 1, secondString, secondWildPosition + 1);
     }
   }

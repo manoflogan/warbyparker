@@ -59,5 +59,10 @@ public class TrieTest {
     Assert.assertEquals(this.trie.findMatchingPattern("foo/bar/baz/"), "foo,bar,baz");
   }
   
+  @Test
+  public void testRegexSix() throws Exception {
+    Assert.assertEquals(this.trie.findMatchingPattern("/a/b/c/d/e/f/"), "a,b,*,d,e,*");
+  }
+  
 
 }

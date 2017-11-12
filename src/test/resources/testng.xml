@@ -2,7 +2,8 @@
 <suite name="warbyparkertests">
     <test name="all">
         <classes>
-          <class name="com.warbyparker.TrieTest" />
+          <class name="com.warbyparker.TrieTest" ></class>
+          <class name="com.warbyparker.WarbyParkerTest"></class>
         </classes>
     </test>
 </suite>
