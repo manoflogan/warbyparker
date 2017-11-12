@@ -16,5 +16,6 @@ To execute the program without using Maven, the following steps are recommended.
 * Execute the following command `cd src/main/java' to navigate to the root of the java package.
 * Compile the Java source code with the following command `javac com/warbyparker/*.java`
 * Execute the java binary class file with the following command `java com.warbyparker.WarbyParker`
+* Follow the instructions as given in **Input Format** section of `SoftwareEngineering` mark down file.
 
 The projects uses TestNG to execute the unit tests. The dependency scope is `test only` and leverages Maven to download and install the package. The dependency is categorized in the `pom.xml`.
