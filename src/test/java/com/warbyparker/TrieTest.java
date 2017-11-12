@@ -37,10 +37,6 @@ public class TrieTest {
   @Test
   public void testRegexOne() throws Exception {
     Assert.assertEquals(this.trie.findMatchingPattern("/w/x/y/z/"), "*,x,y,z");
-    /*
-foo/bar/
-foo/bar/baz/
-     */
   }
   
   @Test
@@ -51,6 +47,16 @@ foo/bar/baz/
   @Test
   public void testRegexThree() throws Exception {
     Assert.assertEquals(this.trie.findMatchingPattern("foo/"), "NO MATCH");
+  }
+  
+  @Test
+  public void testRegexFour() throws Exception {
+    Assert.assertEquals(this.trie.findMatchingPattern("foo/bar/"), "NO MATCH");
+  }
+  
+  @Test
+  public void testRegexFive() throws Exception {
+    Assert.assertEquals(this.trie.findMatchingPattern("foo/bar/baz/"), "foo,bar,baz");
   }
   
 
