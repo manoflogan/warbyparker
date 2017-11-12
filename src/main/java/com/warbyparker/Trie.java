@@ -1,6 +1,7 @@
 
 package com.warbyparker;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -20,6 +21,8 @@ public class Trie {
    */
   private class TrieNode {
     private final Map<String, TrieNode> trieMap;
+    
+    private boolean isEndOfWord;
   
   
     public TrieNode() {
@@ -33,6 +36,14 @@ public class Trie {
     @Override
     public String toString() {
       return new StringBuilder().append(this.trieMap).toString();
+    }
+
+    public boolean isEndOfWord() {
+      return isEndOfWord;
+    }
+
+    public void setEndOfWord(boolean isEndOfWord) {
+      this.isEndOfWord = isEndOfWord;
     }
     
   }
@@ -60,6 +71,7 @@ public class Trie {
       trieMap.put(pattern, next);
       current = next;
     }
+    current.setEndOfWord(true);
   }
   
   String findMatchingPattern(String expression) {
@@ -71,13 +83,18 @@ public class Trie {
     }
     String[] expressions = expression.split("/");
     String match =  this.findMatchingPattern(expressions);
-    System.out.println(match);
     if (match == null || match.isEmpty()) {
       return "NO MATCH";
     }
     return match;
   }
   
+  /**
+   * Finds the best pattern among a group of pattern.
+   * 
+   * @param expressions comma separated array
+   * @return best matching pattern
+   */
   private String findMatchingPattern(String[] expressions) {
     if (expressions == null || expressions.length == 0) {
       return null;
@@ -86,11 +103,8 @@ public class Trie {
     Set<String> matches = new LinkedHashSet<>();
     Set<Integer> wildcardIndexes = new LinkedHashSet<>();
     this.findMatchingPattern(expressions, "", 0, current, matches, wildcardIndexes);
-    System.out.println(matches);
-    return "";
+    return this.findBestPattern(expressions, matches);
   }
-  
-  
   
   /**
    * Finds a set of all matching patterns.
@@ -107,7 +121,10 @@ public class Trie {
       String[] expressions, String fragment, int index, TrieNode node,
       Set<String> matches, Set<Integer> wildcardIndexes) {
     if (index == expressions.length) {
-      return fragment;
+      if (node.isEndOfWord()) {
+        return fragment;
+      }
+      return null;
     }
     
     // Check for matches.
@@ -128,14 +145,14 @@ public class Trie {
       return fragment;
     }
     // Fragment matches. Add it to the string.
-    if (matchedOutput.split(",").length == expressions.length) {
+    if (matchedOutput != null && matchedOutput.split(",").length == expressions.length) {
       matches.add(matchedOutput);
     }
     
     // Checking for wild cards at every stage. No wild cards found. No matching characters found.
     // Exit immediately.
-    if (!trieMap.containsKey("*") || trieMap.get("*").getTrieMap().isEmpty() ||
-        wildcardIndexes.contains(index)) {
+    if (!node.isEndOfWord() && !trieMap.containsKey("*") ||
+        trieMap.get("*").getTrieMap().isEmpty() || wildcardIndexes.contains(index)) {
       return fragment;
     }
     
@@ -150,7 +167,7 @@ public class Trie {
     
     // There is a wild card. Check for it.
     TrieNode next = trieMap.get("*");
-    if (next != null && !next.getTrieMap().isEmpty() && !wildcardIndexes.contains(index)) {
+    if (!next.isEndOfWord() && next != null && !next.getTrieMap().isEmpty() && !wildcardIndexes.contains(index)) {
       wildcardIndexes.add(index);
     }
     matchedOutput = findMatchingPattern(
@@ -163,6 +180,68 @@ public class Trie {
       matches.add(matchedOutput);
     }
     return fragment;
+  }
+  
+  String findBestPattern(String[] expressions, Set<String> matches) {
+    if (matches == null || matches.isEmpty()) {
+      return null;
+    }
+    int minNumberOfWildCards = Integer.MAX_VALUE;
+    int rightMostWildCardPosition = Integer.MIN_VALUE;
+    String bestMatch = null;
+    for (String match : matches) {
+      String[] matchSplit = match.split(",");
+      if (Arrays.equals(expressions, matchSplit)) {
+        return match;
+      }
+      int numberOfWildCards = 0;
+      
+      for (int i = 0; i < matchSplit.length; i++) {
+        if (matchSplit[i].equals("*")) {
+          numberOfWildCards ++;
+        }
+      }
+      if (numberOfWildCards < minNumberOfWildCards) {
+        minNumberOfWildCards = numberOfWildCards;
+        bestMatch = match;
+        rightMostWildCardPosition = match.indexOf("*");
+      } else if (numberOfWildCards == minNumberOfWildCards) {
+        int lastWildCardPosition = match.indexOf("*");
+        if (lastWildCardPosition > rightMostWildCardPosition) {
+          rightMostWildCardPosition = lastWildCardPosition;
+          bestMatch = match;
+        } else if (lastWildCardPosition == rightMostWildCardPosition) {
+          // Applying rule recursively.
+          bestMatch = this.findLeftMostWildCard(
+              bestMatch, rightMostWildCardPosition + 1, match, lastWildCardPosition + 1);
+        }
+      }
+    }
+    return bestMatch;
+  }
+  
+  private String findLeftMostWildCard(String first, int firstIndex, String second, int secondIndex) {
+    if (firstIndex >= first.length() && secondIndex >= second.length()) {
+      return "";
+    }
+    if (firstIndex == -1) {
+      return first;
+    }
+    if (secondIndex == -1) {
+      return second;
+    }
+    String firstString = first.substring(firstIndex);
+    String secondString = second.substring(secondIndex);
+    int firstWildPosition = firstString.indexOf("*");
+    int secondWildPosition = secondString.indexOf("*");
+    if (firstWildPosition < secondWildPosition) {
+      return second;
+    } else if (firstWildPosition > secondWildPosition) {
+      return first;
+    } else {
+      return this.findLeftMostWildCard(
+          firstString, firstWildPosition + 1, secondString, secondWildPosition + 1);
+    }
   }
 
   @Override

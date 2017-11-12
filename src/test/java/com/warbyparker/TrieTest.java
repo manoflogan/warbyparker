@@ -23,7 +23,6 @@ public class TrieTest {
     try(InputStream is = ClassLoader.getSystemResourceAsStream("warbyinput.txt");
         Scanner scanner = new Scanner(is);) {
       int numberOfPatterns = scanner.nextInt();
-      System.out.println(numberOfPatterns);
       for (int i = 0; i < numberOfPatterns; i++) {
         this.trie.addPattern(scanner.next());
       }
@@ -37,14 +36,22 @@ public class TrieTest {
   
   @Test
   public void testRegexOne() throws Exception {
-    Assert.assertNotNull(this.trie.findMatchingPattern("/w/x/y/z/"));
+    Assert.assertEquals(this.trie.findMatchingPattern("/w/x/y/z/"), "*,x,y,z");
     /*
-     * 
-a/b/c
-foo/
 foo/bar/
 foo/bar/baz/
      */
   }
+  
+  @Test
+  public void testRegexTwo() throws Exception {
+    Assert.assertEquals(this.trie.findMatchingPattern("a/b/c"), "a,*,*");
+  }
+  
+  @Test
+  public void testRegexThree() throws Exception {
+    Assert.assertEquals(this.trie.findMatchingPattern("foo/"), "NO MATCH");
+  }
+  
 
 }

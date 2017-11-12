@@ -33,8 +33,7 @@ public class WarbyParker {
             trieNode.addPattern(str);
           }
         }
-        trieNode.setEndOfWord(true);
-        System.out.println(trieNode);
+        
         /*patternReadStatus = true;
         if (!inputStatus) {
           int numberOfExpressions = scanner.nextInt();
