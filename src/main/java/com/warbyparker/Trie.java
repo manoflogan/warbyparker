@@ -156,8 +156,8 @@ public class Trie {
     
     // Checking for wild cards at every stage. No wild cards found. No matching characters found.
     // Exit immediately.
-    if (node.isEndOfWord() || (!trieMap.containsKey("*") || 
-        trieMap.get("*").getTrieMap().isEmpty()) || wildcardIndexes.contains(index)) {
+    if (!trieMap.containsKey("*") || trieMap.get("*").getTrieMap().isEmpty() ||
+        wildcardIndexes.contains(index)) {
       return fragment;
     }
     
@@ -172,21 +172,15 @@ public class Trie {
     
     // There is a wild card. Check for it.
     TrieNode next = trieMap.get("*");
-    if (next == null || next.getTrieMap().isEmpty() || next.isEndOfWord()) {
+    if  (next.getTrieMap().isEmpty() || next.isEndOfWord()) {
       return fragment;
     }
     if (!wildcardIndexes.contains(index)) {
       wildcardIndexes.add(index);
     }
-    matchedOutput = findMatchingPattern(
+    findMatchingPattern(
         expressions, fragment.isEmpty() ? "*" : fragment + ",*", index + 1, next, matches,
         wildcardIndexes);
-    if (matchedOutput == null || matchedOutput.isEmpty()) {
-        return fragment;
-    }
-    if (matchedOutput.split(",").length == expressions.length) {
-      matches.add(matchedOutput);
-    }
     return fragment;
   }
   

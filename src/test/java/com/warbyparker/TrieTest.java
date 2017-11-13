@@ -51,7 +51,7 @@ public class TrieTest {
   
   @Test
   public void testRegexFour() throws Exception {
-    Assert.assertEquals(this.trie.findMatchingPattern("foo/bar/"), "NO MATCH");
+    Assert.assertEquals(this.trie.findMatchingPattern("foo/bar/"), "*,*");
   }
   
   @Test
