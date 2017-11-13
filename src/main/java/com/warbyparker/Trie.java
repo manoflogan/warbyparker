@@ -129,10 +129,7 @@ public class Trie {
       String[] expressions, String fragment, int index, TrieNode node,
       Set<String> matches, Set<Integer> wildcardIndexes) {
     if (index == expressions.length) {
-      if (node.isEndOfWord()) {
-        return fragment;
-      }
-      return null;
+      return node.isEndOfWord() ? fragment: null;
     }
     
     // Check for matches.
@@ -159,8 +156,8 @@ public class Trie {
     
     // Checking for wild cards at every stage. No wild cards found. No matching characters found.
     // Exit immediately.
-    if (!node.isEndOfWord() && !trieMap.containsKey("*") ||
-        trieMap.get("*").getTrieMap().isEmpty() || wildcardIndexes.contains(index)) {
+    if (node.isEndOfWord() || (!trieMap.containsKey("*") || 
+        trieMap.get("*").getTrieMap().isEmpty()) || wildcardIndexes.contains(index)) {
       return fragment;
     }
     
@@ -175,7 +172,10 @@ public class Trie {
     
     // There is a wild card. Check for it.
     TrieNode next = trieMap.get("*");
-    if (!next.isEndOfWord() && next != null && !next.getTrieMap().isEmpty() && !wildcardIndexes.contains(index)) {
+    if (next == null || next.getTrieMap().isEmpty() || next.isEndOfWord()) {
+      return fragment;
+    }
+    if (!wildcardIndexes.contains(index)) {
       wildcardIndexes.add(index);
     }
     matchedOutput = findMatchingPattern(
